@@ -41,7 +41,7 @@ void loop(){
         {
           break;
         } 
-        delay(17);
+        delay(11);
         i++;
       }
       
@@ -52,7 +52,7 @@ void loop(){
       Serial.println((-0.06*(currentTime-previousTime))+240);
       if((currentTime-previousTime) < 1100) {
         // Make servo go to 180 degrees 
-        Servo1.write(180);
+        Servo1.write(30);
       }
       else {
         Servo1.write((-0.06*(currentTime-previousTime))+240);
@@ -69,7 +69,7 @@ void loop(){
         {
            break;
         }
-        delay(17);
+        delay(11);
 
         //Check for T peak value. If we encounter two such values break.
         if((arr[i]>98)&&(arr[i]<102))

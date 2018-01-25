@@ -3,6 +3,9 @@ short int arr[]={101,100,100,99,99,98,97,96,93,95,95,96,97,95,95,95,94,94,93,97,
 
 short int i; //count value for array
 
+//For time calculation
+unsigned long previousTime, currentTime;
+
 const int analogInPin = A0; //Analog pin input for Velostat reading 
 
 int sensorValue = 0; // value read from the Velostat
@@ -19,7 +22,8 @@ void loop() {
   // put your main code here, to run repeatedly:
   while(1)
   {
-    Serial.println("5 Loops Complete");
+    Serial.println("5 Loops Complete both delayed and normal");
+    //Normal ECG
     //loop through 5 ECG cycle samples
     for (i = 0; i < 450; i++)
     {
@@ -42,9 +46,14 @@ void loop() {
         Serial.print("0");
         Serial.print(" ");
         Serial.println(-sensorValue);
-        delay(11);
         i++;
       }
+
+//      currentTime = millis();
+//      Serial.print("--------------");
+//      Serial.println(currentTime-previousTime);
+//
+//      previousTime = currentTime;
 
       //Check for T peak
       //Between R peak and T peak - Air pump is ON and Vacuum pump is OFF
@@ -62,7 +71,82 @@ void loop() {
         Serial.print("1");
         Serial.print(" ");
         Serial.println(-sensorValue);
-        delay(11);
+
+        //Check for T peak value. If we encounter two such values break.
+        if((arr[i]>98)&&(arr[i]<102))
+        {
+          tEquivalentValue++;
+        }
+
+        if(tEquivalentValue == 2)
+        {
+          break;
+        }
+        
+        i++;
+      }
+    }
+
+    //Delayed ECG
+    //loop through 5 ECG cycle samples
+    for (i = 0; i < 450; i++)
+    {
+      short int tEquivalentValue = 0; //Values that are equivalent to T peak in ECG
+      
+      //check for R peak
+      //Between T peak to R peak - Air pump is OFF and Vacuum pump is ON
+      while(arr[i] < 106)
+      {
+        //If last value has reached in this process break from loop
+        if(i == 450)
+        {
+          break;
+        }
+        digitalWrite(8, LOW); //air pump OFF
+        digitalWrite(9, HIGH); //vacuum pump ON
+        sensorValue = analogRead(analogInPin); //reading from Velostat
+        Serial.print(arr[i]);
+        Serial.print(" ");
+        Serial.print("0");
+        Serial.print(" ");
+        Serial.println(-sensorValue);
+        sensorValue = analogRead(analogInPin); //reading from Velostat
+        Serial.print(arr[i]);
+        Serial.print(" ");
+        Serial.print("0");
+        Serial.print(" ");
+        Serial.println(-sensorValue);
+        i++;
+      }
+
+//      currentTime = millis();
+//      Serial.print("--------------");
+//      Serial.println(currentTime-previousTime);
+//
+//      previousTime = currentTime;
+
+      //Check for T peak
+      //Between R peak and T peak - Air pump is ON and Vacuum pump is OFF
+      while(tEquivalentValue < 2)
+      {
+        if(i == 450)
+        {
+           break;
+        }
+        digitalWrite(8, HIGH); //air pump ON
+        digitalWrite(9, LOW); //vacuum pump OFF
+        sensorValue = analogRead(analogInPin); //reading from Velostat
+        Serial.print(arr[i]);
+        Serial.print(" ");
+        Serial.print("1");
+        Serial.print(" ");
+        Serial.println(-sensorValue);
+        sensorValue = analogRead(analogInPin); //reading from Velostat
+        Serial.print(arr[i]);
+        Serial.print(" ");
+        Serial.print("1");
+        Serial.print(" ");
+        Serial.println(-sensorValue);
 
         //Check for T peak value. If we encounter two such values break.
         if((arr[i]>98)&&(arr[i]<102))
